@@ -400,6 +400,28 @@ class PersonAndFaceResult:
         obj_bbox = self.get_bbox_by_ind(ind, *full_image.shape[:2])
         x1, y1, x2, y2 = obj_bbox
         cur_cat = self.yolo_results.names[int(self.yolo_results.boxes[ind].cls)]
+
+        if cur_cat == "face":
+            if x1 > x2:
+                x1, x2 = x2, x1
+            if y1 > y2:
+                y1, y2 = y2, y1
+
+            width = x2 - x1
+            height = y2 - y1
+
+            padding_width = int(width * 0.1)
+            padding_height = int(height * 0.1)
+
+            x1 = max(x1 - padding_width, 0)
+            y1 = max(y1 - padding_height, 0)
+            x2 = min(x2 + padding_width, full_image.shape[1])
+            y2 = min(y2 + padding_height, full_image.shape[0])
+
+        # get crop of face or person
+        obj_image = full_image[y1:y2, x1:x2].copy()
+        crop_h, crop_w = obj_image.shape[:2]
+
         # get crop of face or person
         obj_image = full_image[y1:y2, x1:x2].copy()
         crop_h, crop_w = obj_image.shape[:2]
